@@ -1,0 +1,5 @@
+Best Tour:
+A -> B -> D -> E -> C -> A
+
+Total Distance:
+123.45
