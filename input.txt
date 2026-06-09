@@ -1,7 +1,8 @@
-5
-A 10 20
-B 15 35
-C 40 10
-D 50 30
-E 25 15
-A
+6
+HaNoi 0 0
+HaiPhong 10 5
+NamDinh 8 -3
+ThaiBinh 15 2
+NinhBinh 5 -8
+ThanhHoa 20 -5
+HaNoi
