@@ -20,4 +20,4 @@ python TSP-Heuristic-Search.py
 
 ## Author
 
-Nguyen Duc
+Le Van Duc
