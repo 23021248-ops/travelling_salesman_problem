@@ -1,5 +1,4 @@
 Best Tour:
-A -> B -> D -> E -> C -> A
+0 -> 4 -> 2 -> 3 -> 1 -> 0
 
-Total Distance:
-123.45
+Total Cost: 105.15

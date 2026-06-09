@@ -1,21 +1,59 @@
 import heapq
+import math
 
-dist = [
-    [0, 10, 15, 20],
-    [10, 0, 35, 25],
-    [15, 35, 0, 30],
-    [20, 25, 30, 0]
-]
+def read_input(filename):
 
-n = len(dist)
+    with open(filename, "r") as f:
+        lines = [line.strip() for line in f if line.strip()]
 
-def heuristic(unvisited):
+    n = int(lines[0])
+
+    names = []
+    coords = []
+
+    for i in range(1, n + 1):
+
+        name, x, y = lines[i].split()
+
+        names.append(name)
+        coords.append((float(x), float(y)))
+
+    start_name = lines[n + 1]
+
+    start = names.index(start_name)
+
+    return names, coords, start
+
+def build_distance_matrix(coords):
+
+    n = len(coords)
+
+    dist = [[0] * n for _ in range(n)]
+
+    for i in range(n):
+        for j in range(n):
+
+            x1, y1 = coords[i]
+            x2, y2 = coords[j]
+
+            dist[i][j] = math.sqrt(
+                (x1 - x2) ** 2 +
+                (y1 - y2) ** 2
+            )
+
+    return dist
+
+def heuristic(unvisited, dist):
+
+    n = len(dist)
+
     if not unvisited:
         return 0
 
     h = 0
 
     for city in unvisited:
+
         h += min(
             dist[city][j]
             for j in range(n)
@@ -24,86 +62,105 @@ def heuristic(unvisited):
 
     return h / 2
 
+def tsp_astar(dist, start):
 
-pq = []
+    n = len(dist)
 
-start = 0
+    pq = []
 
-heapq.heappush(
-    pq,
-    (0, 0, [start], set(range(1, n)))
-)
-
-best_cost = float('inf')
-best_path = None
-
-while pq:
-
-    f, g, path, unvisited = heapq.heappop(pq)
-
-    current = path[-1]
-
-    if not unvisited:
-
-        total_cost = g + dist[current][start]
-
-        if total_cost < best_cost:
-            best_cost = total_cost
-            best_path = path + [start]
-
-        continue
-
-    for city in unvisited:
-
-        new_g = g + dist[current][city]
-
-        new_unvisited = unvisited.copy()
-        new_unvisited.remove(city)
-
-        h = heuristic(new_unvisited)
-
-        heapq.heappush(
-            pq,
-            (
-                new_g + h,
-                new_g,
-                path + [city],
-                new_unvisited
-            )
+    heapq.heappush(
+        pq,
+        (
+            0,                      # f
+            0,                      # g
+            [start],                # path
+            set(range(n)) - {start}
         )
-def read_input(filename):
-    with open(filename, "r") as f:
-        lines = [line.strip() for line in f if line.strip()]
+    )
 
-    n = int(lines[0])
+    best_cost = float("inf")
+    best_path = None
 
-    cities = {}
+    while pq:
 
-    for i in range(1, n + 1):
-        name, x, y = lines[i].split()
-        cities[name] = (float(x), float(y))
+        f, g, path, unvisited = heapq.heappop(pq)
 
-    start_city = lines[n + 1]
+        current = path[-1]
 
-    return cities, start_city
+        if not unvisited:
+
+            total_cost = g + dist[current][start]
+
+            if total_cost < best_cost:
+
+                best_cost = total_cost
+                best_path = path + [start]
+
+            continue
+
+        for city in unvisited:
+
+            new_g = g + dist[current][city]
+
+            if new_g >= best_cost:
+                continue
+
+            new_unvisited = unvisited.copy()
+            new_unvisited.remove(city)
+
+            h = heuristic(new_unvisited, dist)
+
+            heapq.heappush(
+                pq,
+                (
+                    new_g + h,
+                    new_g,
+                    path + [city],
+                    new_unvisited
+                )
+            )
+
+    return best_path, best_cost
+
+def write_output(filename, path, cost):
+
+    with open(filename, "w") as f:
+
+        f.write("Best Tour:\n")
+
+        f.write(
+            " -> ".join(map(str, path))
+        )
+
+        f.write("\n\n")
+
+        f.write(
+            f"Total Cost: {cost:.2f}\n"
+        )
+
+def main():
+
+    names, coords, start = read_input("input.txt")
+
+    dist = build_distance_matrix(coords)
+
+    best_path, best_cost = tsp_astar(
+        dist,
+        start
+    )
+
+    print("Best Tour:")
+    print(best_path)
+
+    print("\nTotal Cost:")
+    print(round(best_cost, 2))
+
+    write_output(
+        "output.txt",
+        best_path,
+        best_cost
+    )
 
 
-cities, start = read_input("input.txt")
-
-print(cities)
-print("Start:", start)
-print("Best Tour:")
-print(best_path)
-
-best_path = "A -> B -> D -> E -> C -> A"
-best_cost = 123.45
-
-with open("output.txt", "w") as f:
-    f.write("Best Tour:\n")
-    f.write(best_path + "\n\n")
-
-    f.write("Total Distance:\n")
-    f.write(str(best_cost))
-    
-print("Total Cost:")
-print(best_cost)
+if __name__ == "__main__":
+    main()
